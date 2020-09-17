@@ -9,15 +9,19 @@ import javafx.scene.effect.BlendMode;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
+
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
 public class ParticlesApp extends Application {
 
-    private Emitter emitter = new FireEmmiter();
-    private Emitter emitter2 = new FireEmmiter();
-    private List<Particle> particles = new ArrayList<>();
+    private Emitter emitter = new UniversalEmitter();
+    private int numParticles = 10;
+
+    private Particle[] particles = new Particle[numParticles * 32];
 
     private GraphicsContext g;
 
@@ -28,16 +32,14 @@ public class ParticlesApp extends Application {
         g.setFill(Color.BLACK);
         g.fillRect(0,0,600,600);
 
-        particles.addAll(emitter.emit(300,600));
-
-        for (Iterator<Particle> it = particles.iterator(); it.hasNext();)
+        System.out.println(particles.length);
+        for (int i  = 0 ; i < particles.length; i++)
         {
-            Particle p = it.next();
+            Particle p = particles[i];
             p.update();
             if(!p.isAlive())
             {
-                it.remove();
-                continue;
+                particles[i] = emitter.newParticle(600, 600);
             }
             p.render(g);
         }
@@ -59,6 +61,7 @@ public class ParticlesApp extends Application {
     public void start(Stage stage) throws Exception {
         stage.setScene(new Scene(createContent()));
         stage.show();
+        populateParticle();
 
         AnimationTimer timer = new AnimationTimer() {
             @Override
@@ -68,6 +71,22 @@ public class ParticlesApp extends Application {
         };
         timer.start();
 
+    }
+
+    private void populateParticle() {
+        for(int i = 1; i < 33; i++)
+        {
+            int tmp = i * numParticles;
+            int count = 0;
+            for(int j  = tmp - numParticles ; j < tmp; j++)
+            {
+                Particle[] particle = emitter.emit(600,600,numParticles);
+                System.out.println(j);
+                particles[j] = particle[count];
+                count++;
+            }
+
+        }
     }
 
 
